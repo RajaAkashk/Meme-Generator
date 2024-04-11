@@ -1,56 +1,26 @@
-const API_URL = 'https://opentdb.com/api.php?amount=1&type=multiple';
+const memeBtn = document.querySelector(".meme-btn");
+const memeTitle = document.querySelector(".meme-title");
+const memeImg = document.querySelector("#mImg");
+const authorName = document.querySelector(".author-name");
 
-let score = 0;
-let currentQuestion = null;
+const updateDetails = (url, title, author) => {
+    memeImg.setAttribute("src", url);
+    memeTitle.innerHTML = title;
+    authorName.innerHTML = `Author Name:${author}`;
+};
 
-async function fetchQuestion() {
-    const response = await fetch(API_URL);
-    const data = await response.json();
-    return data.results[0];
-}
-
-function displayQuestion(question) {
-    const questionElement = document.getElementById('question');
-    questionElement.innerHTML = question.question;
-
-    const optionsElement = document.getElementById('options');
-    optionsElement.innerHTML = '';
-
-    const allOptions = [...question.incorrect_answers, question.correct_answer];
-    const shuffledOptions = shuffle(allOptions);
-
-    shuffledOptions.forEach(option => {
-        const button = document.createElement('button');
-        button.textContent = option;
-        button.onclick = () => checkAnswer(option, question.correct_answer);
-        optionsElement.appendChild(button);
+const generateMeme = () => {
+    fetch("https://meme-api.com/gimme")
+    .then((response) => response.json())
+    .then((data) => {
+        updateDetails(data.url, data.title, data.author);
+    })
+    .catch((error) => {
+        console.error('Error fetching meme:', error);
     });
-}
+};
 
-function checkAnswer(selectedOption, correctAnswer) {
-    if (selectedOption === correctAnswer) {
-        score++;
-        document.getElementById('score-value').textContent = score;
-    }
-}
+memeBtn.addEventListener("click", generateMeme);
 
-function shuffle(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
-}
 
-async function init() {
-    currentQuestion = await fetchQuestion();
-    displayQuestion(currentQuestion);
-
-    const nextButton = document.getElementById('next-btn');
-    nextButton.addEventListener('click', async () => {
-        currentQuestion = await fetchQuestion();
-        displayQuestion(currentQuestion);
-    });
-}
-
-init();
+generateMeme();
